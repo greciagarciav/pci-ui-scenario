@@ -3,6 +3,7 @@ import { ColDef } from "ag-grid-community";
 import data from "./near-earth-asteroids.json";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import Header from "./components/header";
 
 const columnDefs: ColDef[] = [
   { field: "designation", headerName: "Designation" },
@@ -20,6 +21,7 @@ const columnDefs: ColDef[] = [
 const NeoGrid = (): JSX.Element => {
   return (
     <div className="ag-theme-alpine" style={{ height: 900, width: 1920 }}>
+      <Header />
       <AgGridReact
         rowData={data}
         columnDefs={columnDefs}
