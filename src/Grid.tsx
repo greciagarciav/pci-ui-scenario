@@ -4,6 +4,7 @@ import data from "./near-earth-asteroids.json";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import Header from "./components/header";
+import { useMemo } from "react";
 
 const columnDefs: ColDef[] = [
   { field: "designation", headerName: "Designation" },
@@ -19,12 +20,20 @@ const columnDefs: ColDef[] = [
 ];
 
 const NeoGrid = (): JSX.Element => {
+  const defaultColDef = useMemo( ()=> {
+    return {
+      filter: true,
+      sortable: true
+    }
+  }, [])
+
   return (
     <div className="ag-theme-alpine" style={{ height: 900, width: 1920 }}>
       <Header />
       <AgGridReact
         rowData={data}
         columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
         rowGroupPanelShow={'always'}
       />
     </div>
