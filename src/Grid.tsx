@@ -25,7 +25,13 @@ const columnDefs: ColDef[] = [
   { field: "q_au_2", headerName: "Q (au)" },
   { field: "period_yr", headerName: "Period (yr)" },
   { field: "i_deg", headerName: "Inclination (deg)" },
-  { field: "pha", headerName: "Potentially Hazardous" },
+  { field: "pha", headerName: "Potentially Hazardous",
+    valueFormatter: (params) => {
+      if (params.value === "Y") return "Yes";
+      if (params.value === "N") return "No";
+      return "";
+    }
+   },
   { field: "orbit_class", headerName: "Orbit Class", enableRowGroup: true, },
 ];
 
