@@ -8,7 +8,17 @@ import { useMemo } from "react";
 
 const columnDefs: ColDef[] = [
   { field: "designation", headerName: "Designation" },
-  { field: "discovery_date", headerName: "Discovery Date" },
+  { field: "discovery_date", headerName: "Discovery Date",
+    valueFormatter: (params) => {
+      const date = new Date(params.value);
+      const formattedDate = date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      return formattedDate;
+    }
+   },
   { field: "h_mag", headerName: "H (mag)" },
   { field: "moid_au", headerName: "MOID (au)" },
   { field: "q_au_1", headerName: "q (au)" },
