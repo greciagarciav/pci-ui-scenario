@@ -4,65 +4,34 @@ import data from "./near-earth-asteroids.json";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import Header from "./components/header";
-import { useMemo, useRef,  useCallback } from "react";
+import { useMemo } from "react";
 import Button from "./components/button";
+import { formatDiscoveryDate, formatPotentiallyHazardous } from "./lib/utils";
+import { AsteroidObject } from "./lib/definitions";
+import { useGridActions } from "./lib/actions";
 
 const columnDefs: ColDef[] = [
   { field: "designation", headerName: "Designation", checkboxSelection:true, headerCheckboxSelection: true },
-  { field: "discovery_date", headerName: "Discovery Date",
-    valueFormatter: (params) => {
-      const date = new Date(params.value);
-      const formattedDate = date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-      return formattedDate;
-    }
-   },
+  { field: "discovery_date", headerName: "Discovery Date", valueFormatter: formatDiscoveryDate },
   { field: "h_mag", headerName: "H (mag)" },
   { field: "moid_au", headerName: "MOID (au)" },
   { field: "q_au_1", headerName: "q (au)" },
   { field: "q_au_2", headerName: "Q (au)" },
   { field: "period_yr", headerName: "Period (yr)" },
   { field: "i_deg", headerName: "Inclination (deg)" },
-  { field: "pha", headerName: "Potentially Hazardous",
-    valueFormatter: (params) => {
-      if (params.value === "Y") return "Yes";
-      if (params.value === "N") return "No";
-      return "";
-    }
-   },
+  { field: "pha", headerName: "Potentially Hazardous", valueFormatter: formatPotentiallyHazardous },
   { field: "orbit_class", headerName: "Orbit Class" },
 ];
 
 const NeoGrid = (): JSX.Element => {
+  const { gridRef, clearFilters } = useGridActions();
+
   const defaultColDef = useMemo( ()=> {
     return {
       filter: true,
       sortable: true
     }
   }, [])
-
-  const gridRef = useRef<AgGridReact>(null);
-  const clearFilters = useCallback(() => {
-    if (gridRef.current) {
-      gridRef.current.api.setFilterModel(null);
-      gridRef.current.columnApi.applyColumnState(
-        {
-          defaultState: {
-            sort: null
-        }
-        }
-      )
-    }
-  }, []);
-
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.ctrlKey && event.key === 'c') {
-      copySelectedCellsToClipboard();
-    }
-  };
 
   const copySelectedCellsToClipboard = () => {
     if (gridRef.current) {
@@ -84,6 +53,12 @@ const NeoGrid = (): JSX.Element => {
     }
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.ctrlKey && event.key === 'c') {
+      copySelectedCellsToClipboard();
+    }
+  };
+
   const rowSelectionType="multiple"
 
   return (
@@ -100,7 +75,7 @@ const NeoGrid = (): JSX.Element => {
 
       <AgGridReact        
         ref={gridRef}
-        rowData={data}
+        rowData={data as AsteroidObject[]}
         columnDefs={columnDefs}
         rowSelection={rowSelectionType}
         rowMultiSelectWithClick={true}  
@@ -108,6 +83,8 @@ const NeoGrid = (): JSX.Element => {
         rowGroupPanelShow={'always'}
         enableRangeSelection={true}
         suppressRowClickSelection={true}
+        pagination={true}
+        paginationPageSize={10}
       />
     </div>
   );
