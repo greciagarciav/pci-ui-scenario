@@ -8,7 +8,7 @@ import { useMemo, useRef,  useCallback } from "react";
 import Button from "./components/button";
 
 const columnDefs: ColDef[] = [
-  { field: "designation", headerName: "Designation" },
+  { field: "designation", headerName: "Designation", checkboxSelection:true, headerCheckboxSelection: true },
   { field: "discovery_date", headerName: "Discovery Date",
     valueFormatter: (params) => {
       const date = new Date(params.value);
@@ -33,7 +33,7 @@ const columnDefs: ColDef[] = [
       return "";
     }
    },
-  { field: "orbit_class", headerName: "Orbit Class", enableRowGroup: true, },
+  { field: "orbit_class", headerName: "Orbit Class" },
 ];
 
 const NeoGrid = (): JSX.Element => {
@@ -58,18 +58,56 @@ const NeoGrid = (): JSX.Element => {
     }
   }, []);
 
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.ctrlKey && event.key === 'c') {
+      copySelectedCellsToClipboard();
+    }
+  };
+
+  const copySelectedCellsToClipboard = () => {
+    if (gridRef.current) {
+      const selectedNodes = gridRef.current.api.getSelectedNodes();
+      const selectedData = selectedNodes.map(node => node.data);
+      const columnKeys = gridRef.current.columnApi.getColumns()?.map(col => col.getColId());
+      
+      let clipboardText = '';
+
+      if (selectedData.length > 0 && columnKeys) {
+        clipboardText = selectedData
+          .map(row => columnKeys.map(key => row[key] ?? '').join('\t'))
+          .join('\n');
+
+        navigator.clipboard.writeText(clipboardText)
+          .then(() => console.log("Copied to clipboard"))
+          .catch(err => console.error("Failed to copy:", err));
+      }
+    }
+  };
+
+  const rowSelectionType="multiple"
+
   return (
-    <div className="ag-theme-alpine" style={{ height: 900, width: 1920 }}>
+    <div className="ag-theme-alpine" 
+      style={{ height: 900, width: 1920 }}
+      tabIndex={0} 
+      onKeyDown={handleKeyDown}
+      >
+        
       <div style={{marginBottom:"20px", marginTop: "8px", display: "flex", alignItems: "center", justifyContent: "center"}}>
         <Header />
         <Button onClick={clearFilters} />
       </div>
-      <AgGridReact
+
+      <AgGridReact        
         ref={gridRef}
         rowData={data}
         columnDefs={columnDefs}
+        rowSelection={rowSelectionType}
+        rowMultiSelectWithClick={true}  
         defaultColDef={defaultColDef}
         rowGroupPanelShow={'always'}
+        enableRangeSelection={true}
+        suppressRowClickSelection={true}
       />
     </div>
   );
