@@ -4,7 +4,8 @@ import data from "./near-earth-asteroids.json";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import Header from "./components/header";
-import { useMemo } from "react";
+import { useMemo, useRef,  useCallback } from "react";
+import Button from "./components/button";
 
 const columnDefs: ColDef[] = [
   { field: "designation", headerName: "Designation" },
@@ -43,10 +44,28 @@ const NeoGrid = (): JSX.Element => {
     }
   }, [])
 
+  const gridRef = useRef<AgGridReact>(null);
+  const clearFilters = useCallback(() => {
+    if (gridRef.current) {
+      gridRef.current.api.setFilterModel(null);
+      gridRef.current.columnApi.applyColumnState(
+        {
+          defaultState: {
+            sort: null
+        }
+        }
+      )
+    }
+  }, []);
+
   return (
     <div className="ag-theme-alpine" style={{ height: 900, width: 1920 }}>
-      <Header />
+      <div style={{marginBottom:"20px", marginTop: "8px", display: "flex", alignItems: "center", justifyContent: "center"}}>
+        <Header />
+        <Button onClick={clearFilters} />
+      </div>
       <AgGridReact
+        ref={gridRef}
         rowData={data}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
